@@ -5,10 +5,10 @@ from selenium.webdriver.chrome.service import Service as ChromiumService
 from selenium.webdriver.firefox.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.utils import ChromeType
-from selenium.webdriver.chrome.service import Service
 
 
 def get_data_from_local_html(html_name):
+    """for debugging"""
     with open(html_name, "r", encoding="utf-8") as f:
         contents = f.read()
         soup = BeautifulSoup(contents, "lxml")
@@ -108,24 +108,34 @@ def convert_to_gpx(url):
     return gpx_routes
 
 
+def create_gpx_filename(route):
+    filename = route[1]
+    route_distance = route[2]
+
+    return f"{filename}_{route_distance}.gpx"
+
+
+def save_gpx_file_to_disk(route):
+    gpx_file = route[0]
+    full_filename = create_gpx_filename(route)
+    with open(full_filename, "w", encoding="utf-8") as f:
+        f.write(gpx_file)
+
+
 def main(url):
     template = "https://yandex.ru/maps/"
     if url.startswith(template):
         routes = convert_to_gpx(url)
 
         for route in routes:
-            gpx = route[0]
-            filename = route[1]
-            route_distance = route[2]
-            full_filename = f"{filename}_{route_distance}.gpx"
+            save_gpx_file_to_disk(route)
 
-            with open(full_filename, "w", encoding="utf-8") as f:
-                f.write(gpx)
-            return "Success"
+        return "Success"
     else:
         return f"Input url does not match the template - {template}..."
 
 
 if __name__ == "__main__":
-    input_url = input("Введите ссылку: ")
-    main(input_url)
+    input_url = input("Input URL: ")
+    response = main(input_url)
+    print(response)
